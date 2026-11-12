@@ -15,9 +15,9 @@ bloqueo, parry, esquiva…).
 | TypeScript | 5.x, `strict: true` | Todo el código. |
 | Vite | 7.x | Servidor de desarrollo y build. |
 | Electron | 45.x | Ventana de escritorio y empaquetado (`.exe`). |
-| Vitest | tests de lógica pura (`src/core`). |
-| Playwright | ya instalado en el entorno; verificación de salas con capturas (skill `verify-room`). |
-| Tweakpane | panel de ajuste en vivo (solo en desarrollo). |
+| Vitest | 3.2 | Tests de lógica pura (`src/core`). (Vitest 4 rompe la instalación con npm 10.) |
+| Playwright | 1.63.0 (fijada) | Verificación de salas con capturas (skill `verify-room`). Misma versión que el Chromium preinstalado del entorno de Claude. |
+| Tweakpane | — | Panel de ajuste en vivo. **Aún no instalado**: se añade cuando una sala lo necesite. |
 
 ## Comandos
 
@@ -27,8 +27,9 @@ npm run dev:web      # Solo Vite en http://localhost:5173 (lo que uso yo para ve
 npm run typecheck    # tsc --noEmit
 npm run lint         # ESLint
 npm test             # Vitest (lógica pura)
-npm run verify -- <room-id>   # Verificación visual de una sala (Playwright + capturas)
-npm run package      # Ejecutable de escritorio en release/
+npm run verify -- <room-id>   # Verificación de una sala (Playwright + capturas en artifacts/rooms/<id>/)
+npm run build        # Build de producción en dist/ (Electron la carga si no hay servidor de desarrollo)
+# npm run package    # Ejecutable .exe: pendiente, se añadirá (electron-builder) cuando haga falta
 ```
 
 Antes de dar algo por terminado: `npm run typecheck && npm run lint && npm test`, y para cambios de
@@ -86,12 +87,11 @@ Solo en desarrollo. Permite verificar salas sin jugar a mano:
 ```ts
 window.__souls = {
   roomId: string,
-  tick: number,                       // ticks simulados desde que empezó la sala
   pause(): void, resume(): void,
   step(ticks: number): void,          // avanza N ticks con el juego en pausa (determinista)
   press(action, ticks?): void,        // pulsa una acción N ticks (por defecto 1)
   hold(action): void, release(action): void,
-  snapshot(): Record<string, unknown> // estado legible: player.state, stamina, hp, x, y, facing, …
+  snapshot(): Record<string, unknown> // { tick, ...lo que exponga la sala en getSnapshot() }
 }
 ```
 

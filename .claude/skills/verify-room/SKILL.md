@@ -27,7 +27,7 @@ import { test, expect } from '@playwright/test';
 import { openRoom } from './helpers';
 
 test('ataque ligero: fases y coste de stamina', async ({ page }) => {
-  const room = await openRoom(page, 'light-attack');   // navega a /?room=…, espera a __souls, pausa
+  const room = await openRoom(page, 'light-attack');
 
   const before = await room.snapshot();
   await room.press('attackLight');
@@ -45,52 +45,14 @@ test('ataque ligero: fases y coste de stamina', async ({ page }) => {
 ```
 
 Cubre como mínimo: el caso feliz, una cancelación válida, una inválida y el caso sin stamina (si aplica).
-Usa los números desde los datos cuando sea posible (`room.data()`), no los copies a mano.
 
-## `tests/rooms/helpers.ts` (crear si no existe)
+## Piezas existentes
 
-```ts
-import type { Page } from '@playwright/test';
-
-export async function openRoom(page: Page, roomId: string) {
-  await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto(`/?room=${roomId}&test=1`);
-  await page.waitForFunction(() => (window as any).__souls?.roomId);
-  await page.evaluate(() => (window as any).__souls.pause());
-  const call = (fn: string, ...args: unknown[]) =>
-    page.evaluate(([f, a]) => (window as any).__souls[f as string](...(a as unknown[])), [fn, args] as const);
-  return {
-    step: (ticks: number) => call('step', ticks),
-    press: (action: string, ticks = 1) => call('press', action, ticks),
-    hold: (action: string) => call('hold', action),
-    release: (action: string) => call('release', action),
-    snapshot: () => call('snapshot') as Promise<any>,
-    data: () => call('data') as Promise<any>,
-    shot: (name: string) => page.screenshot({ path: `artifacts/rooms/${roomId}/${name}.png` }),
-  };
-}
-```
-
-`?test=1` desactiva lo no determinista (partículas aleatorias con semilla fija, screenshake visual, Tweakpane).
-
-## `playwright.config.ts` (crear si no existe)
-
-```ts
-import { defineConfig } from '@playwright/test';
-import { existsSync } from 'node:fs';
-
-// En el entorno de Claude hay un Chromium preinstalado; en el PC del usuario se usa el de Playwright.
-const preinstalled = '/opt/pw-browsers/chromium';
-
-export default defineConfig({
-  testDir: 'tests/rooms',
-  use: {
-    baseURL: 'http://localhost:5173',
-    launchOptions: existsSync(preinstalled) ? { executablePath: preinstalled } : {},
-  },
-  webServer: { command: 'npm run dev:web', url: 'http://localhost:5173', reuseExistingServer: true },
-});
-```
+- `tests/rooms/helpers.ts` → `openRoom(page, id)`: abre `/?room=<id>`, espera a `window.__souls`, pausa y
+  devuelve `step`, `press`, `hold`, `release`, `snapshot` y `shot` (espera un frame de render y guarda el PNG).
+- `playwright.config.ts` → usa el Chromium preinstalado si existe y arranca Vite como `webServer`.
+- `tests/rooms/movement.spec.ts` → ejemplo completo (correr, frenar, salto completo vs. corto, colisión).
+- Importa los números desde `src/data/` en las aserciones en vez de copiarlos.
 
 ## Informe al usuario
 
