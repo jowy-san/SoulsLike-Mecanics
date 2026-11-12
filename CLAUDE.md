@@ -34,6 +34,12 @@ npm run package      # Ejecutable de escritorio en release/
 Antes de dar algo por terminado: `npm run typecheck && npm run lint && npm test`, y para cambios de
 jugabilidad, `npm run verify -- <room-id>` revisando las capturas.
 
+## Principio: código justo
+
+Escribe solo lo que la tarea necesita (skill `lean-code`). La arquitectura de abajo es el **destino**, no
+una lista que montar de golpe: cada carpeta, sistema o herramienta de depuración se crea cuando una sala lo
+necesita. Ideas extra → proponerlas al usuario, no implementarlas.
+
 ## Arquitectura
 
 ```
@@ -95,6 +101,7 @@ Toda sala nueva debe exponer en `snapshot()` lo necesario para comprobar su mec�
 
 - `phaser-*` — referencia oficial de la API de Phaser 4 (del paquete `phaser`, licencia MIT). Úsalas antes
   de escribir código Phaser en vez de fiarte de la memoria (que suele ser de Phaser 3).
+- `lean-code` — código mínimo; repaso del diff antes de terminar. Úsala siempre.
 - `souls-combat-design` — principios y números de partida para combate tipo Souls y *game feel*.
 - `new-test-room` — crear una sala de prueba nueva con la plantilla y registrarla.
 - `add-combat-action` — añadir un ataque/estado nuevo (frame data + FSM + tests).

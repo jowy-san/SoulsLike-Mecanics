@@ -15,14 +15,16 @@ Cada sala es una escena de Phaser que prueba **una** mecánica, con lo mínimo n
    qué se prueba, qué elementos hay (suelo, muñeco de práctica, enemigo que ataca en bucle…), qué números
    iniciales se usan. Consulta `souls-combat-design` para los valores de partida.
 3. **Crea `src/rooms/<id>/<Name>Room.ts`** partiendo de la plantilla de abajo. La sala:
-   - extiende `BaseRoom` (en `src/rooms/BaseRoom.ts`), que ya aporta: suelo, cámara, simulación a 60 Hz fija,
-     overlay de depuración (tecla `F1` hitboxes, `F2` panel Tweakpane, `F3` cámara lenta, `F4` pausa/frame a frame),
-     puente `window.__souls`, y la tecla `Esc` para volver al menú;
+   - extiende `BaseRoom` (en `src/rooms/BaseRoom.ts`), con lo común a todas las salas: suelo, cámara,
+     simulación a 60 Hz fija, puente `window.__souls` y `Esc` para volver al menú;
    - solo añade lo específico de su mecánica;
+   - herramientas de depuración (overlay de hitboxes, panel Tweakpane, cámara lenta, frame a frame) se añaden
+     a `BaseRoom` **la primera vez que una sala las necesite de verdad**, no antes (skill `lean-code`);
    - muestra arriba a la izquierda un texto breve con los controles relevantes y el objetivo de la sala.
 4. **Registra la sala** en `src/rooms/registry.ts` (id, título en español, descripción de una línea, clase).
 5. **Expón el estado** necesario para verificarla en `snapshot()` (sobrescribe `getSnapshot()`).
-6. **Expón los números** de la mecánica en el panel Tweakpane (sobrescribe `buildTuningPanel(pane)`).
+6. **Expón los números** que el usuario vaya a ajustar en el panel Tweakpane (sobrescribe
+   `buildTuningPanel(pane)`), solo si la sala tiene valores que ajustar.
 7. **Escenario de verificación**: crea `tests/rooms/<id>.spec.ts` con la skill `verify-room`.
 8. **Comprueba**: `npm run typecheck && npm run lint && npm test && npm run verify -- <id>`, mira las capturas,
    y explica al usuario cómo probarla: `npm run dev` → elegir la sala en el menú.
@@ -62,9 +64,9 @@ export class ExampleRoom extends BaseRoom {
 }
 ```
 
-> Si `BaseRoom` todavía no existe (primera sala), créalo primero con todo lo descrito en el paso 3 y
-> el puente descrito en `CLAUDE.md` → "Puente de depuración". Ajusta esta plantilla si la API real difiere,
-> y actualiza esta skill para que siga reflejando el código.
+> Si `BaseRoom` todavía no existe (primera sala), créalo con lo mínimo del paso 3. Los métodos de la
+> plantilla que la sala no necesite (`getSnapshot`, `buildTuningPanel`) se omiten. Si la API real difiere,
+> actualiza esta skill para que siga reflejando el código.
 
 ## Reglas
 
